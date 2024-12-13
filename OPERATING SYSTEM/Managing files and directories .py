@@ -1,84 +1,95 @@
 import os
 import shutil
-from tkinter import Tk
-from tkinter import filedialog
+from tkinter import Tk, filedialog, Button, Label, Entry, Listbox, Scrollbar, END
 
-#testing files with a test directory path
-
+# Functions for file and folder operations
 def choose_file():
-    filename = filedialog.askopenfilename(title="Choose a file",
-                                          filetypes=(("All Files", "*.*"), ("Text files", "*.txt")))
-    return filename
+    return filedialog.askopenfilename(title="Choose a File")
 
 def choose_directory():
-    dirname = filedialog.askdirectory(title="Choose directory.")
-    return dirname
+    return filedialog.askdirectory(title="Choose a Directory")
 
-def main():
-    print("-------------------------")
-    print("\t OPERATIONS")
-    print("-------------------------")
-    print(" 1 - OPEN A EXISTING FILE ")
-    print(" 2 - CREATE A NEW FOLDER/DIR")
-    print(" 3 - MOVE A FILE ")
-    print(" 4 - COPY A FILE ")
-    print(" 5 - DELETE A FILE ")
-    print(" 6 - RENAME A FILE ")
-    print(" 7 - REMOVE A FOLDER ")
-    print(" 8 - LIST ALL FILES IN THE DIRECTORY ")
-    print("-------------------------")
-    choice = int(input("CHOOSE A OPERATION (1-8) : "))
+def open_file():
+    file = choose_file()
+    if file:
+        os.startfile(file)
 
-    #open file
-    if choice == 1:
-        filename = filedialog.askopenfilename(title="Choose a file",filetypes=(("All Files", "*.*"),("Text files", "*.txt")))
-        os.startfile(filename)
+def create_folder():
+    folder = choose_directory()
+    name = folder_entry.get()
+    if name and folder:
+        os.mkdir(os.path.join(folder, name))
 
-    #create new file
-    elif choice == 2:
-        folder = choose_directory()
-        name = input("Enter folder name:> ")
-        folder_name = folder + "/" + name
-        os.mkdir(folder_name)
+def move_file():
+    file = choose_file()
+    folder = choose_directory()
+    if file and folder:
+        shutil.move(file, folder)
 
-    #move file
-    elif choice == 3:
-        file = choose_file()
-        to_location = choose_directory()
-        shutil.move(file, to_location)
+def copy_file():
+    file = choose_file()
+    folder = choose_directory()
+    if file and folder:
+        shutil.copy(file, folder)
 
-    #copy file
-    elif choice == 4:
-        to_copy = choose_file()
-        to_location = choose_directory()
-        shutil.copy(to_copy, to_location)
-
-    #delete file
-    elif choice == 5:
-        file = choose_file()
+def delete_file():
+    file = choose_file()
+    if file:
         os.remove(file)
 
-    #rename
-    elif choice == 6:
-        file = choose_file()
-        new_name = input("Enter new name:> ")
-        ext = os.path.splitext(from_file)[-1]
-        dirname = os.path.dirname(from_file)
-        new_file = os.path.join(dirname, to_file + ext)
-        os.rename(from_file, new_file)
+def rename_file():
+    file = choose_file()
+    new_name = rename_entry.get()
+    if file and new_name:
+        folder = os.path.dirname(file)
+        ext = os.path.splitext(file)[-1]
+        os.rename(file, os.path.join(folder, new_name + ext))
 
-    #remove folder
-    elif choice == 7:
-        folder = choose_directory()
+def delete_folder():
+    folder = choose_directory()
+    if folder:
         shutil.rmtree(folder)
 
-    #list files
-    if choice == 8:
-        folder = choose_directory()
-        items = os.listdir(folder)
-        print("These are the folder(s) or file(s) in this directory")
-        for item in items:
-            print(item)
+def list_files():
+    folder = choose_directory()
+    if folder:
+        listbox.delete(0, END)
+        for file in os.listdir(folder):
+            listbox.insert(END, file)
 
+# GUI Configuration
+root = Tk()
+root.title("File Operations")
+root.geometry("400x600")
+root.configure(bg="lightblue")
 
-main()
+# Folder Name Input
+Label(root, text="Enter folder name:", bg="lightblue").pack(pady=5)
+folder_entry = Entry(root)
+folder_entry.pack(pady=5)
+
+# Buttons for operations
+Button(root, text="Open File", command=open_file, bg="green", fg="white").pack(pady=5)
+Button(root, text="Create Folder", command=create_folder, bg="blue", fg="white").pack(pady=5)
+Button(root, text="Move File", command=move_file, bg="orange", fg="white").pack(pady=5)
+Button(root, text="Copy File", command=copy_file, bg="yellow").pack(pady=5)
+Button(root, text="Delete File", command=delete_file, bg="red", fg="white").pack(pady=5)
+
+# Rename File Input
+Label(root, text="Enter new name:", bg="lightblue").pack(pady=5)
+rename_entry = Entry(root)
+rename_entry.pack(pady=5)
+
+Button(root, text="Rename File", command=rename_file, bg="purple", fg="white").pack(pady=5)
+Button(root, text="Remove Folder", command=delete_folder, bg="magenta", fg="white").pack(pady=5)
+Button(root, text="List Files", command=list_files, bg="cyan").pack(pady=5)
+
+# Listbox for displaying files
+scrollbar = Scrollbar(root)
+scrollbar.pack(side="right", fill="y")
+
+listbox = Listbox(root, yscrollcommand=scrollbar.set, width=40, height=10)
+listbox.pack(pady=10)
+scrollbar.config(command=listbox.yview)
+
+root.mainloop()
