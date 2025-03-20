@@ -1,6 +1,0 @@
-Flask
-openai
-face_recognition
-opencv-python
-pytesseract
-Pillow
